@@ -115,7 +115,7 @@ function TxRow({ tx, divider }: { tx: Transaction; divider: boolean }) {
           <div className="font-medium text-[15px] truncate">{tx.title}</div>
         </div>
         <div className="text-xs text-slate truncate font-light">
-          {formatTime(tx.date)} · {tx.subtitle}
+          {formatTime(tx.date)} · {tx.subtitle.replace(/\s*••\s*\d+/g, "").replace(/\s+·\s*$/, "")}
         </div>
       </div>
       <div className="text-right shrink-0">

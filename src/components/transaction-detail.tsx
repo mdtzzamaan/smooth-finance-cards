@@ -203,59 +203,68 @@ function TransferArc({
   to: Party;
   amount: string;
 }) {
-  // SVG viewBox is 320x110. Coin animates along the curve from x=46 to x=274.
-  const pathD = "M 46 78 Q 160 -10 274 78";
+  // Path endpoints sit exactly at avatar centers (x=0 and x=320, y=50).
+  const pathD = "M 0 50 Q 160 -30 320 50";
   return (
     <div className="px-6 my-6 animate-fade-up">
-      <div className="bg-white border border-line rounded-3xl px-5 pt-5 pb-4 relative overflow-hidden">
-        <div className="flex items-end justify-between gap-4">
-          <PartyChip party={from} side="left" />
-          <div className="flex-1 relative h-[110px] -mx-2">
-            <svg viewBox="0 0 320 110" className="absolute inset-0 w-full h-full overflow-visible">
-              <defs>
-                <linearGradient id="arcGrad" x1="0" x2="1" y1="0" y2="0">
-                  <stop offset="0%" stopColor="var(--midnight)" stopOpacity="0.15" />
-                  <stop offset="50%" stopColor="var(--amber)" stopOpacity="0.9" />
-                  <stop offset="100%" stopColor="var(--midnight)" stopOpacity="0.15" />
-                </linearGradient>
-              </defs>
-              <path
-                d={pathD}
-                fill="none"
-                stroke="url(#arcGrad)"
-                strokeWidth="1.5"
-                strokeDasharray="3 5"
-                strokeLinecap="round"
-              />
-              {/* Direction arrow at receiver end */}
-              <path d="M 268 76 L 276 78 L 268 80" fill="none" stroke="var(--midnight)" strokeOpacity="0.4" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-
-            {/* Travelling coin */}
-            <div className="absolute inset-0 pointer-events-none">
-              <div
-                className="coin"
-                style={
-                  {
-                    offsetPath: `path("${pathD}")`,
-                    WebkitOffsetPath: `path("${pathD}")`,
-                  } as React.CSSProperties
-                }
+      <div className="bg-white border border-line rounded-3xl px-5 pt-6 pb-5 relative">
+        {/* Inner area reserves 32px on each side for avatar overflow */}
+        <div className="relative mx-8">
+          <svg
+            viewBox="0 0 320 100"
+            className="block w-full h-auto overflow-visible"
+            preserveAspectRatio="xMidYMid meet"
+          >
+            <defs>
+              <linearGradient id="arcGrad" x1="0" x2="1" y1="0" y2="0">
+                <stop offset="0%" stopColor="var(--midnight)" stopOpacity="0.18" />
+                <stop offset="50%" stopColor="var(--amber)" stopOpacity="0.95" />
+                <stop offset="100%" stopColor="var(--midnight)" stopOpacity="0.18" />
+              </linearGradient>
+            </defs>
+            <path
+              d={pathD}
+              fill="none"
+              stroke="url(#arcGrad)"
+              strokeWidth="1.5"
+              strokeDasharray="3 5"
+              strokeLinecap="round"
+            />
+            {/* Travelling coin pill — animates along the same path, center to center */}
+            <g>
+              <rect x="-30" y="-13" width="60" height="22" rx="11" fill="var(--midnight)" />
+              <text
+                y="2"
+                textAnchor="middle"
+                fill="white"
+                fontSize="11"
+                fontWeight="500"
+                fontFamily="ui-monospace, SFMono-Regular, Menlo, monospace"
               >
-                <div className="coin-pill">
-                  <span className="font-mono text-[11px] font-medium tracking-tight">{amount}</span>
-                </div>
-              </div>
-            </div>
+                {amount}
+              </text>
+              <animateMotion
+                dur="2.6s"
+                repeatCount="indefinite"
+                path={pathD}
+                rotate="0"
+                calcMode="spline"
+                keyTimes="0;1"
+                keySplines="0.45 0 0.55 1"
+              />
+            </g>
+          </svg>
 
-            {/* Pulse pings on each end */}
-            <span className="ping ping-left" style={{ background: from.ring }} />
-            <span className="ping ping-right" style={{ background: to.ring }} />
+          {/* Avatars — centered exactly on SVG endpoints (left:0 / right:0, mid-height) */}
+          <div className="absolute top-1/2 left-0 -translate-x-1/2 -translate-y-1/2 z-10">
+            <PartyChip party={from} side="left" />
           </div>
-          <PartyChip party={to} side="right" />
+          <div className="absolute top-1/2 right-0 translate-x-1/2 -translate-y-1/2 z-10">
+            <PartyChip party={to} side="right" />
+          </div>
         </div>
 
-        <div className="mt-1 flex items-center justify-between">
+        <div className="mt-4 flex items-center justify-between">
           <div className="min-w-0 max-w-[42%]">
             <div className="text-[13px] font-medium truncate">{from.name}</div>
             <div className="text-[11px] text-slate truncate font-light">{from.sub}</div>
