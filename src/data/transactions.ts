@@ -35,6 +35,8 @@ export interface Transaction {
   reference: string;
   method?: string;
   category?: string;
+  channel?: string;
+  balanceAfter?: number;
   note?: string;
   feeRelatedTo?: string; // id of original tx for fee
   meta?: Record<string, string>;
