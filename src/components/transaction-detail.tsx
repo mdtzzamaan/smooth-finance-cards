@@ -155,15 +155,12 @@ export function TransactionDetail() {
       {/* Remittance summary */}
       {tx.bdtAmount != null && !isZero && (
         <div className="px-6 mt-4 animate-fade-up">
-          <div className="bg-midnight text-white rounded-2xl p-5 relative overflow-hidden">
-            <div className="absolute -bottom-12 -right-10 w-40 h-40 rounded-full opacity-25 blur-2xl" style={{ background: "var(--amber)" }} />
-            <div className="relative">
-              <div className="label-mono text-white/60 mb-3">Remittance summary</div>
-              <Row k="You sent" v={`$${a.value} USD`} />
-              {tx.fxRate && <Row k="Rate" v={tx.fxRate} />}
-              <div className="h-px bg-white/10 my-3" />
-              <Row k="Recipient gets" v={`৳${tx.bdtAmount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} BDT`} bold />
-            </div>
+          <div className="bg-white border border-line rounded-2xl p-5">
+            <div className="label-mono mb-3">Remittance summary</div>
+            <Row k="You sent" v={`$${a.value} USD`} />
+            {tx.fxRate && <Row k="Rate" v={tx.fxRate} />}
+            <div className="h-px bg-line my-3" />
+            <Row k="Recipient gets" v={`৳${tx.bdtAmount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} BDT`} bold />
           </div>
         </div>
       )}
