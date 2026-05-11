@@ -57,6 +57,8 @@ const txs: Transaction[] = [
     method: "Visa Debit •• 4421",
     category: "Electronics",
     meta: { Merchant: "APPLE.COM/BILL", "Auth code": "A93KQ2", MCC: "5732 — Electronics" },
+    channel: "Mobile · iOS 18.4",
+    balanceAfter: 8421.07
   },
   {
     id: "TX-90377",
@@ -71,6 +73,8 @@ const txs: Transaction[] = [
     reference: "PYO-FEE-7F3K9",
     feeRelatedTo: "TX-90381",
     meta: { "Fee type": "FX conversion", Rate: "1.2%" },
+    channel: "System",
+    balanceAfter: 8419.52
   },
   {
     id: "TX-90375",
@@ -85,6 +89,8 @@ const txs: Transaction[] = [
     reference: "PYO-INT-22910",
     method: "Priyo to Priyo",
     note: "Dinner split 🍜",
+    channel: "Mobile · iOS 18.4",
+    balanceAfter: 8421.07
   },
   {
     id: "TX-90370",
@@ -99,6 +105,8 @@ const txs: Transaction[] = [
     reference: "PYO-ACH-IN-55021",
     method: "ACH · Bank of America",
     meta: { "Trace #": "021000021554102", "Effective date": "May 10, 2026", "Originator ID": "1800948598" },
+    channel: "API · ACH network",
+    balanceAfter: 8181.07
   },
   {
     id: "TX-90362",
@@ -113,6 +121,8 @@ const txs: Transaction[] = [
     reference: "PYO-WIRE-OUT-3318",
     method: "Domestic wire",
     meta: { "Beneficiary bank": "JPMorgan Chase", "Routing": "021000021", "Account": "•••• 7782", "IMAD": "20260509B1QGC07C001234" },
+    channel: "Web · Desktop",
+    balanceAfter: 3360.57
   },
   {
     id: "TX-90360",
@@ -127,6 +137,8 @@ const txs: Transaction[] = [
     reference: "PYO-FEE-3318",
     feeRelatedTo: "TX-90362",
     meta: { "Fee type": "Domestic wire", Schedule: "Standard" },
+    channel: "System",
+    balanceAfter: 3335.57
   },
   {
     id: "TX-90355",
@@ -141,6 +153,8 @@ const txs: Transaction[] = [
     reference: "PYO-WLT-77291",
     method: "Mobile wallet · bKash",
     meta: { "Recipient": "+880 17XX XXX 4421", "Settlement": "Within 30 min" },
+    channel: "Mobile · iOS 18.4",
+    balanceAfter: 15860.57
   },
   {
     id: "TX-90341",
@@ -155,6 +169,8 @@ const txs: Transaction[] = [
     reference: "PYO-BNK-44021",
     method: "ACH · Same-day",
     meta: { "Account": "•••• 9921", "Routing": "021000021", "ETA": "May 8, 2026" },
+    channel: "Web · Desktop",
+    balanceAfter: 15945.57
   },
   {
     id: "TX-90332",
@@ -170,6 +186,8 @@ const txs: Transaction[] = [
     method: "Visa Debit •• 4421",
     category: "Groceries",
     meta: { "Auth code": "B72LP8", MCC: "5411 — Grocery" },
+    channel: "Card terminal · NFC",
+    balanceAfter: 17445.57
   },
   {
     id: "TX-90325",
@@ -184,6 +202,8 @@ const txs: Transaction[] = [
     reference: "PYO-FX-22018",
     method: "Instant exchange",
     meta: { "You sold": "$500.00 USD", "You received": "€461.20 EUR", "Rate": "1 USD = 0.9224 EUR" },
+    channel: "Mobile · iOS 18.4",
+    balanceAfter: 17523.99
   },
   {
     id: "TX-90310",
@@ -197,6 +217,8 @@ const txs: Transaction[] = [
     counterparty: { name: "Priyo Savings", detail: "4.25% APY", logo: "%", color: "#2D7A4F" },
     reference: "PYO-INT-MAY",
     method: "Auto-credit",
+    channel: "System · Auto-credit",
+    balanceAfter: 18023.99
   },
   {
     id: "TX-90305",
@@ -210,6 +232,8 @@ const txs: Transaction[] = [
     counterparty: { name: "Nike, Inc.", detail: "Order #N-882910", logo: "N", color: "#111111" },
     reference: "PYO-RFD-77821",
     method: "Visa Debit •• 4421",
+    channel: "Card network",
+    balanceAfter: 18005.57
   },
 ];
 
