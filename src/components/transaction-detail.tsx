@@ -232,9 +232,9 @@ function TransferArc({
           >
             <defs>
               <linearGradient id="arcGrad" x1="0" x2="1" y1="0" y2="0">
-                <stop offset="0%" stopColor="var(--ink)" stopOpacity="0.18" />
+                <stop offset="0%" stopColor="var(--midnight)" stopOpacity="0.25" />
                 <stop offset="50%" stopColor="var(--amber)" stopOpacity="0.95" />
-                <stop offset="100%" stopColor="var(--ink)" stopOpacity="0.18" />
+                <stop offset="100%" stopColor="var(--midnight)" stopOpacity="0.25" />
               </linearGradient>
             </defs>
             <path
