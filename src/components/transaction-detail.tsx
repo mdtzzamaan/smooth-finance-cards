@@ -133,21 +133,27 @@ export function TransactionDetail() {
             <Tile label="Balance after" value={`$${tx.balanceAfter.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} mono />
           )}
           {tx.meta &&
-            Object.entries(tx.meta).map(([k, v]) => (
-              <Tile
-                key={k}
-                label={k}
-                value={v}
-                mono={
-                  k.toLowerCase().includes("trace") ||
-                  k.toLowerCase().includes("imad") ||
-                  k.toLowerCase().includes("routing") ||
-                  k.toLowerCase().includes("auth") ||
-                  k.toLowerCase().includes("rate") ||
-                  k.toLowerCase().includes("id")
-                }
-              />
-            ))}
+            Object.entries(tx.meta)
+              .filter(([k]) =>
+                tx.type === "fx_exchange"
+                  ? !["You sold", "You received", "Rate"].includes(k)
+                  : true
+              )
+              .map(([k, v]) => (
+                <Tile
+                  key={k}
+                  label={k}
+                  value={v}
+                  mono={
+                    k.toLowerCase().includes("trace") ||
+                    k.toLowerCase().includes("imad") ||
+                    k.toLowerCase().includes("routing") ||
+                    k.toLowerCase().includes("auth") ||
+                    k.toLowerCase().includes("rate") ||
+                    k.toLowerCase().includes("id")
+                  }
+                />
+              ))}
         </div>
         {tx.note && (
           <div className="mt-3 bg-amber-soft/60 border border-amber/30 rounded-2xl p-4">
