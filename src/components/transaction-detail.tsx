@@ -248,7 +248,7 @@ function TransferArc({
             />
             {animated && amount && (
               <g>
-                <rect x="-30" y="-13" width="60" height="22" rx="11" fill="var(--ink)" />
+                <rect x="-30" y="-13" width="60" height="22" rx="11" fill="var(--midnight)" />
                 <text
                   y="2"
                   textAnchor="middle"
