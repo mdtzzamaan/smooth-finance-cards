@@ -146,7 +146,7 @@ export function TransactionDetail() {
         </div>
         {tx.memo && (
           <div className="mt-3 bg-amber-soft/60 border border-amber/30 rounded-2xl p-4">
-            <div className="label-mono mb-1.5" style={{ color: "var(--ink)" }}>Note</div>
+            <div className="label-mono mb-1.5" style={{ color: "var(--midnight)" }}>Note</div>
             <p className="text-sm text-ink leading-relaxed">{tx.memo}</p>
           </div>
         )}
@@ -182,7 +182,7 @@ export function TransactionDetail() {
 
 function LinkedCard({ label, ctx }: { label: string; ctx: LinkedContext }) {
   const Inner = (
-    <div className="bg-white rounded-2xl border border-line p-4 flex items-center gap-3 hover:border-ink/20 hover:bg-cream/40 transition">
+    <div className="bg-white rounded-2xl border border-line p-4 flex items-center gap-3 hover:border-midnight/30 hover:bg-midnight-mist/40 transition">
       <div className="flex-1 min-w-0">
         {ctx.title && <div className="text-[14px] font-medium truncate">{ctx.title}</div>}
         {ctx.memo && (
@@ -232,9 +232,9 @@ function TransferArc({
           >
             <defs>
               <linearGradient id="arcGrad" x1="0" x2="1" y1="0" y2="0">
-                <stop offset="0%" stopColor="var(--ink)" stopOpacity="0.18" />
+                <stop offset="0%" stopColor="var(--midnight)" stopOpacity="0.25" />
                 <stop offset="50%" stopColor="var(--amber)" stopOpacity="0.95" />
-                <stop offset="100%" stopColor="var(--ink)" stopOpacity="0.18" />
+                <stop offset="100%" stopColor="var(--midnight)" stopOpacity="0.25" />
               </linearGradient>
             </defs>
             <path
@@ -248,7 +248,7 @@ function TransferArc({
             />
             {animated && amount && (
               <g>
-                <rect x="-30" y="-13" width="60" height="22" rx="11" fill="var(--ink)" />
+                <rect x="-30" y="-13" width="60" height="22" rx="11" fill="var(--midnight)" />
                 <text
                   y="2"
                   textAnchor="middle"
@@ -305,7 +305,7 @@ function TransferArc({
 }
 
 function PartyChip({ party }: { party: Party }) {
-  const ring = party.color || "var(--ink)";
+  const ring = party.color || "var(--midnight)";
   return (
     <div className="relative shrink-0 animate-scale-in">
       <div
@@ -360,14 +360,14 @@ function Row({ k, v, bold }: { k: string; v: string; bold?: boolean }) {
   return (
     <div className="flex items-center justify-between py-1">
       <div className="text-sm text-slate">{k}</div>
-      <div className={`font-mono text-sm ${bold ? "text-ink font-medium" : "text-ink"}`}>{v}</div>
+      <div className={`font-mono text-sm ${bold ? "text-midnight font-semibold" : "text-ink"}`}>{v}</div>
     </div>
   );
 }
 
 function ActionTile({ icon: Icon, label }: { icon: any; label: string }) {
   return (
-    <button className="bg-white border border-line rounded-2xl py-4 flex flex-col items-center gap-2 hover:border-ink/20 hover:-translate-y-0.5 transition">
+    <button className="bg-white border border-line rounded-2xl py-4 flex flex-col items-center gap-2 text-midnight hover:border-midnight/30 hover:bg-midnight-mist/40 hover:-translate-y-0.5 transition">
       <Icon className="w-4 h-4" strokeWidth={1.6} />
       <span className="text-xs">{label}</span>
     </button>
