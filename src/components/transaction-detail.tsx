@@ -146,7 +146,7 @@ export function TransactionDetail() {
         </div>
         {tx.memo && (
           <div className="mt-3 bg-amber-soft/60 border border-amber/30 rounded-2xl p-4">
-            <div className="label-mono mb-1.5" style={{ color: "var(--ink)" }}>Note</div>
+            <div className="label-mono mb-1.5" style={{ color: "var(--midnight)" }}>Note</div>
             <p className="text-sm text-ink leading-relaxed">{tx.memo}</p>
           </div>
         )}
