@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
-import { transactions } from "@/data/transactions";
+import { transactions, counterpartyOf } from "@/data/transactions";
 import { TxIcon } from "@/components/tx-icon";
 import { formatAmount } from "@/lib/format";
 import { PhoneFrame } from "@/components/transactions-list";

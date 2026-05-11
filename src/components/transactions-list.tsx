@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Search, SlidersHorizontal, ArrowLeft } from "lucide-react";
-import { transactions, type Transaction } from "@/data/transactions";
+import { transactions, counterpartyOf, type Transaction } from "@/data/transactions";
 import { TxIcon } from "@/components/tx-icon";
 import { formatAmount, formatTime, dayKey } from "@/lib/format";
 
@@ -105,25 +105,48 @@ function TxRow({ tx, divider }: { tx: Transaction; divider: boolean }) {
       className={`flex items-center gap-4 px-4 py-4 hover:bg-cream/60 transition group ${divider ? "border-b border-line" : ""}`}
     >
       <div
-        className="w-11 h-11 rounded-full flex items-center justify-center shrink-0 text-white"
-        style={{ background: tx.counterparty.color || "var(--midnight)" }}
+        className="w-11 h-11 rounded-full overflow-hidden shrink-0 ring-1 ring-line"
+        style={{ background: counterpartyOf(tx).color || "var(--midnight)" }}
       >
-        <TxIcon type={tx.type} className="w-[18px] h-[18px]" />
+        {counterpartyOf(tx).imageUrl ? (
+          <img
+            src={counterpartyOf(tx).imageUrl}
+            alt={counterpartyOf(tx).name}
+            className="w-full h-full object-cover"
+            loading="lazy"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-white">
+            <TxIcon type={tx.type} className="w-[18px] h-[18px]" />
+          </div>
+        )}
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-baseline gap-2">
           <div className="font-medium text-[15px] truncate">{tx.title}</div>
         </div>
         <div className="text-xs text-slate truncate font-light">
-          {formatTime(tx.date)} · {tx.subtitle.replace(/\s*••\s*\d+/g, "").replace(/\s+·\s*$/, "")}
+          {formatTime(tx.date)} · {tx.subtitle.replace(/\s*··\s*\d+/g, "").replace(/\s+·\s*$/, "")}
         </div>
       </div>
       <div className="text-right shrink-0">
-        <div className={`font-mono text-[15px] ${positive ? "text-success" : "text-ink"}`}>
+        <div className={`font-mono text-[15px] ${positive ? "text-success" : tx.status === "declined" || tx.status === "expired" ? "text-slate line-through" : "text-ink"}`}>
           {a.sign}${a.value}
         </div>
         {tx.status !== "completed" && (
-          <div className="label-mono mt-1" style={{ color: tx.status === "pending" ? "var(--warning)" : "var(--error)" }}>
+          <div
+            className="label-mono mt-1"
+            style={{
+              color:
+                tx.status === "pending"
+                  ? "var(--warning)"
+                  : tx.status === "declined" || tx.status === "failed"
+                  ? "var(--error)"
+                  : tx.status === "released"
+                  ? "var(--success)"
+                  : "var(--slate)",
+            }}
+          >
             {tx.status}
           </div>
         )}
