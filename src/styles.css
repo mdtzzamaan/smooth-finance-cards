@@ -137,3 +137,48 @@
 .stagger > *:nth-child(8) { animation-delay: 0.32s; }
 .stagger > *:nth-child(9) { animation-delay: 0.36s; }
 .stagger > *:nth-child(10) { animation-delay: 0.40s; }
+
+/* Money flying along the curve */
+@keyframes coin-travel {
+  0%   { offset-distance: 0%;   opacity: 0; transform: scale(0.6); }
+  10%  { opacity: 1; transform: scale(1); }
+  90%  { opacity: 1; transform: scale(1); }
+  100% { offset-distance: 100%; opacity: 0; transform: scale(0.6); }
+}
+.coin {
+  position: absolute;
+  top: 0; left: 0;
+  offset-rotate: 0deg;
+  animation: coin-travel 2.6s cubic-bezier(0.55, 0.05, 0.35, 1) infinite;
+  will-change: offset-distance, transform, opacity;
+}
+.coin-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: var(--midnight);
+  color: #fff;
+  box-shadow: 0 8px 20px -8px color-mix(in oklab, var(--midnight) 60%, transparent),
+              0 0 0 3px color-mix(in oklab, var(--amber) 35%, transparent);
+  transform: translate(-50%, -50%);
+}
+
+/* Soft pulse rings on each party endpoint */
+@keyframes ping-soft {
+  0%   { transform: translate(-50%, -50%) scale(0.6); opacity: 0.55; }
+  80%  { transform: translate(-50%, -50%) scale(1.8); opacity: 0; }
+  100% { transform: translate(-50%, -50%) scale(1.8); opacity: 0; }
+}
+.ping {
+  position: absolute;
+  width: 18px; height: 18px;
+  border-radius: 999px;
+  top: 78px;
+  opacity: 0.4;
+  animation: ping-soft 2.6s ease-out infinite;
+  filter: blur(0.5px);
+}
+.ping-left  { left: 46px;  animation-delay: 0s; }
+.ping-right { left: 274px; animation-delay: 1.3s; }
