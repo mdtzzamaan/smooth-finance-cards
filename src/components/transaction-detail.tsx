@@ -12,6 +12,30 @@ const statusColor: Record<string, string> = {
   scheduled: "var(--info)",
 };
 
+// Dummy but deterministic image source — assume any name resolves to a real avatar.
+const avatarUrl = (seed: string, bg = "191970") =>
+  `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(seed)}&backgroundColor=${bg}&textColor=ffffff&fontWeight=600&radius=50`;
+
+type Party = { name: string; sub: string; img: string; ring?: string };
+
+function partiesFor(tx: Transaction): { from: Party; to: Party } {
+  const me: Party = {
+    name: "You",
+    sub: "Priyo •• 0042",
+    img: avatarUrl("AK", "f5b400"),
+    ring: "var(--amber)",
+  };
+  const cpColor = (tx.counterparty.color || "#191970").replace("#", "");
+  const cp: Party = {
+    name: tx.counterparty.name,
+    sub: tx.counterparty.detail || txTypeLabel[tx.type],
+    img: avatarUrl(tx.counterparty.name, cpColor),
+    ring: tx.counterparty.color || "var(--midnight)",
+  };
+  // Incoming if positive amount; outgoing otherwise (fees flow from you to Priyo).
+  return tx.amount >= 0 ? { from: cp, to: me } : { from: me, to: cp };
+}
+
 export function TransactionDetail() {
   const { id } = useParams({ from: "/transactions/$id" });
   const tx = getTransaction(id);
@@ -31,6 +55,7 @@ export function TransactionDetail() {
   const a = formatAmount(tx.amount, tx.currency);
   const positive = tx.amount > 0;
   const linkedTx = tx.feeRelatedTo ? getTransaction(tx.feeRelatedTo) : null;
+  const { from, to } = partiesFor(tx);
 
   return (
     <PhoneFrame>
@@ -47,31 +72,23 @@ export function TransactionDetail() {
         </div>
       </div>
 
-      {/* Hero */}
-      <div className="px-6 pt-8 pb-10 text-center animate-fade-up">
-        <div
-          className="mx-auto w-16 h-16 rounded-2xl flex items-center justify-center text-white mb-5 animate-scale-in"
-          style={{ background: tx.counterparty.color || "var(--midnight)" }}
-        >
-          <TxIcon type={tx.type} className="w-6 h-6" />
-        </div>
-        <div className="label-mono mb-3">{tx.counterparty.name}</div>
+      {/* Hero amount */}
+      <div className="px-6 pt-6 pb-2 text-center animate-fade-up">
+        <div className="label-mono mb-3">{positive ? "Received" : "Sent"}</div>
         <h1 className={`font-display text-[56px] leading-none ${positive ? "text-success" : "text-ink"}`}>
           {a.sign}${a.value}
         </h1>
         <div className="mt-3 flex items-center justify-center gap-2">
-          <span
-            className="inline-block w-1.5 h-1.5 rounded-full"
-            style={{ background: statusColor[tx.status] }}
-          />
-          <span className="label-mono" style={{ color: statusColor[tx.status] }}>
-            {tx.status}
-          </span>
+          <span className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: statusColor[tx.status] }} />
+          <span className="label-mono" style={{ color: statusColor[tx.status] }}>{tx.status}</span>
           <span className="text-slate text-xs font-light">
             · {formatDate(tx.date)} at {formatTime(tx.date)}
           </span>
         </div>
       </div>
+
+      {/* Sender → Receiver with curved money flow */}
+      <TransferArc from={from} to={to} amount={`${a.sign}$${a.value}`} type={tx.type} />
 
       {/* Linked original transaction (for fees) */}
       {linkedTx && (
@@ -104,20 +121,34 @@ export function TransactionDetail() {
         </div>
       )}
 
-      {/* Details card */}
+      {/* Modern details — stacked tiles, not key/value rows */}
       <div className="px-6 animate-fade-up">
-        <div className="bg-white rounded-2xl border border-line p-1">
-          <Detail label="Reference" value={tx.reference} mono />
-          {tx.method && <Detail label="Method" value={tx.method} />}
-          {tx.category && <Detail label="Category" value={tx.category} />}
-          <Detail label="Counterparty" value={tx.counterparty.name} sub={tx.counterparty.detail} />
-          <Detail label="Date" value={`${formatDate(tx.date)}, ${formatTime(tx.date)}`} />
+        <div className="label-mono mb-3">Details</div>
+        <div className="grid grid-cols-2 gap-2.5">
+          <Tile label="Reference" value={tx.reference} mono span />
+          {tx.method && <Tile label="Method" value={tx.method} />}
+          {tx.category && <Tile label="Category" value={tx.category} />}
           {tx.meta &&
             Object.entries(tx.meta).map(([k, v]) => (
-              <Detail key={k} label={k} value={v} mono={k.toLowerCase().includes("trace") || k.toLowerCase().includes("imad") || k.toLowerCase().includes("routing")} />
+              <Tile
+                key={k}
+                label={k}
+                value={v}
+                mono={
+                  k.toLowerCase().includes("trace") ||
+                  k.toLowerCase().includes("imad") ||
+                  k.toLowerCase().includes("routing") ||
+                  k.toLowerCase().includes("auth")
+                }
+              />
             ))}
-          {tx.note && <Detail label="Note" value={tx.note} />}
         </div>
+        {tx.note && (
+          <div className="mt-3 bg-amber-soft/60 border border-amber/30 rounded-2xl p-4">
+            <div className="label-mono mb-1.5" style={{ color: "var(--midnight)" }}>Note</div>
+            <p className="text-sm text-ink leading-relaxed">{tx.note}</p>
+          </div>
+        )}
       </div>
 
       {/* Amount breakdown */}
@@ -126,10 +157,10 @@ export function TransactionDetail() {
           <div className="absolute -bottom-12 -right-10 w-40 h-40 rounded-full opacity-25 blur-2xl" style={{ background: "var(--amber)" }} />
           <div className="relative">
             <div className="label-mono text-white/60 mb-3">Summary</div>
-            <Row k="Amount" v={`${formatAmount(tx.amount).sign}$${formatAmount(tx.amount).value} ${tx.currency}`} />
+            <Row k="Amount" v={`${a.sign}$${a.value} ${tx.currency}`} />
             {tx.type !== "fee" && <Row k="Fees" v={tx.type === "fx_exchange" ? "Included in rate" : "$0.00"} />}
             <div className="h-px bg-white/10 my-3" />
-            <Row k="Total" v={`${formatAmount(tx.amount).sign}$${formatAmount(tx.amount).value}`} bold />
+            <Row k="Total" v={`${a.sign}$${a.value}`} bold />
           </div>
         </div>
       </div>
@@ -149,24 +180,119 @@ export function TransactionDetail() {
   );
 }
 
-function Detail({
+function TransferArc({
+  from,
+  to,
+  amount,
+  type,
+}: {
+  from: Party;
+  to: Party;
+  amount: string;
+  type: Transaction["type"];
+}) {
+  // SVG viewBox is 320x110. Coin animates along the curve from x=46 to x=274.
+  const pathD = "M 46 78 Q 160 -10 274 78";
+  return (
+    <div className="px-6 my-6 animate-fade-up">
+      <div className="bg-white border border-line rounded-3xl px-5 pt-5 pb-4 relative overflow-hidden">
+        <div className="flex items-end justify-between gap-4">
+          <PartyChip party={from} side="left" />
+          <div className="flex-1 relative h-[110px] -mx-2">
+            <svg viewBox="0 0 320 110" className="absolute inset-0 w-full h-full overflow-visible">
+              <defs>
+                <linearGradient id="arcGrad" x1="0" x2="1" y1="0" y2="0">
+                  <stop offset="0%" stopColor="var(--midnight)" stopOpacity="0.15" />
+                  <stop offset="50%" stopColor="var(--amber)" stopOpacity="0.9" />
+                  <stop offset="100%" stopColor="var(--midnight)" stopOpacity="0.15" />
+                </linearGradient>
+              </defs>
+              <path
+                d={pathD}
+                fill="none"
+                stroke="url(#arcGrad)"
+                strokeWidth="1.5"
+                strokeDasharray="3 5"
+                strokeLinecap="round"
+              />
+              {/* Direction arrow at receiver end */}
+              <path d="M 268 76 L 276 78 L 268 80" fill="none" stroke="var(--midnight)" strokeOpacity="0.4" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+
+            {/* Travelling coin */}
+            <div className="absolute inset-0 pointer-events-none">
+              <div
+                className="coin"
+                style={
+                  {
+                    offsetPath: `path("${pathD}")`,
+                    WebkitOffsetPath: `path("${pathD}")`,
+                  } as React.CSSProperties
+                }
+              >
+                <div className="coin-pill">
+                  <TxIcon type={type} className="w-3 h-3" />
+                  <span className="font-mono text-[11px] font-medium">{amount}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Pulse pings on each end */}
+            <span className="ping ping-left" style={{ background: from.ring }} />
+            <span className="ping ping-right" style={{ background: to.ring }} />
+          </div>
+          <PartyChip party={to} side="right" />
+        </div>
+
+        <div className="mt-1 flex items-center justify-between">
+          <div className="min-w-0 max-w-[42%]">
+            <div className="text-[13px] font-medium truncate">{from.name}</div>
+            <div className="text-[11px] text-slate truncate font-light">{from.sub}</div>
+          </div>
+          <div className="label-mono opacity-60 px-2">to</div>
+          <div className="min-w-0 max-w-[42%] text-right">
+            <div className="text-[13px] font-medium truncate">{to.name}</div>
+            <div className="text-[11px] text-slate truncate font-light">{to.sub}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PartyChip({ party, side }: { party: Party; side: "left" | "right" }) {
+  return (
+    <div className={`relative shrink-0 ${side === "left" ? "animate-scale-in" : "animate-scale-in"}`}>
+      <div
+        className="w-16 h-16 rounded-full p-[2px]"
+        style={{ background: `conic-gradient(from 180deg, ${party.ring}, transparent 65%, ${party.ring})` }}
+      >
+        <img
+          src={party.img}
+          alt={party.name}
+          className="w-full h-full rounded-full object-cover bg-cream"
+          loading="lazy"
+        />
+      </div>
+    </div>
+  );
+}
+
+function Tile({
   label,
   value,
-  sub,
   mono,
+  span,
 }: {
   label: string;
   value: string;
-  sub?: string;
   mono?: boolean;
+  span?: boolean;
 }) {
   return (
-    <div className="px-4 py-3.5 border-b border-line last:border-b-0 flex items-start justify-between gap-4">
-      <div className="text-xs text-slate font-medium pt-0.5 shrink-0">{label}</div>
-      <div className="text-right min-w-0">
-        <div className={`text-sm text-ink ${mono ? "font-mono" : ""} truncate`}>{value}</div>
-        {sub && <div className="text-xs text-slate font-light mt-0.5 truncate">{sub}</div>}
-      </div>
+    <div className={`bg-white border border-line rounded-2xl px-3.5 py-3 ${span ? "col-span-2" : ""}`}>
+      <div className="label-mono mb-1.5">{label}</div>
+      <div className={`text-[13.5px] text-ink leading-snug break-words ${mono ? "font-mono" : ""}`}>{value}</div>
     </div>
   );
 }
@@ -189,5 +315,4 @@ function ActionTile({ icon: Icon, label }: { icon: any; label: string }) {
   );
 }
 
-// re-export type for typing
 export type { Transaction };
