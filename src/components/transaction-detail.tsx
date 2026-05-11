@@ -182,7 +182,7 @@ export function TransactionDetail() {
 
 function LinkedCard({ label, ctx }: { label: string; ctx: LinkedContext }) {
   const Inner = (
-    <div className="bg-white rounded-2xl border border-line p-4 flex items-center gap-3 hover:border-ink/20 hover:bg-cream/40 transition">
+    <div className="bg-white rounded-2xl border border-line p-4 flex items-center gap-3 hover:border-midnight/30 hover:bg-midnight-mist/40 transition">
       <div className="flex-1 min-w-0">
         {ctx.title && <div className="text-[14px] font-medium truncate">{ctx.title}</div>}
         {ctx.memo && (
