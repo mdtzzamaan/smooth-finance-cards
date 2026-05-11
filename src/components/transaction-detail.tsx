@@ -367,7 +367,7 @@ function Row({ k, v, bold }: { k: string; v: string; bold?: boolean }) {
 
 function ActionTile({ icon: Icon, label }: { icon: any; label: string }) {
   return (
-    <button className="bg-white border border-line rounded-2xl py-4 flex flex-col items-center gap-2 hover:border-ink/20 hover:-translate-y-0.5 transition">
+    <button className="bg-white border border-line rounded-2xl py-4 flex flex-col items-center gap-2 text-midnight hover:border-midnight/30 hover:bg-midnight-mist/40 hover:-translate-y-0.5 transition">
       <Icon className="w-4 h-4" strokeWidth={1.6} />
       <span className="text-xs">{label}</span>
     </button>
