@@ -44,7 +44,7 @@ export function TransactionsList() {
           </div>
 
           <h1 className="font-display text-5xl mb-1">Activity</h1>
-          <p className="text-white/60 text-sm font-light mb-8">May 2026 · 12 transactions</p>
+          <p className="text-white/60 text-sm font-light mb-8">May 2026 · {transactions.length} transactions</p>
 
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-white/5 backdrop-blur rounded-2xl p-4 border border-white/10">
