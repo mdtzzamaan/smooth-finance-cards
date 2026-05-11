@@ -1,5 +1,5 @@
 import { Link, useParams } from "@tanstack/react-router";
-import { ArrowLeft, Share2, MoreHorizontal, Download, Flag, Repeat2 } from "lucide-react";
+import { ArrowLeft, Share2, MoreHorizontal, Download, Flag, Repeat2, ChevronRight } from "lucide-react";
 import {
   getTransaction,
   counterpartyOf,
