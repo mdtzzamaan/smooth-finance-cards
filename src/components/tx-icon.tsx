@@ -3,58 +3,30 @@ import {
   ArrowUpRight,
   Banknote,
   CreditCard,
-  Smartphone,
-  Building2,
   Receipt,
-  Percent,
-  RefreshCw,
+  Globe,
   Repeat,
   Undo2,
-  Globe,
-  Repeat1,
-  CalendarClock,
 } from "lucide-react";
-import type { TxType } from "@/data/transactions";
+import type { Transaction } from "@/data/transactions";
 
-export function TxIcon({ type, className }: { type: TxType; className?: string }) {
+// Map a real transaction (rawType + amount sign + title hints) to an icon.
+export function TxIcon({ tx, className }: { tx: Transaction; className?: string }) {
+  const t = (tx.rawType || "").toLowerCase();
+  const positive = tx.amount > 0;
+  const title = tx.title.toLowerCase();
+
   const Icon = (() => {
-    switch (type) {
-      case "internal_transfer_in":
-        return ArrowDownLeft;
-      case "internal_transfer_out":
-        return ArrowUpRight;
-      case "international_transfer_out":
-        return Globe;
-      case "bank_withdraw":
-      case "bank_deposit":
-        return Building2;
-      case "wallet_withdraw":
-      case "wallet_topup":
-        return Smartphone;
-      case "card_payment":
-      case "card_atm":
-        return CreditCard;
-      case "card_refund":
-        return Undo2;
-      case "ach_in":
-      case "ach_out":
-        return Banknote;
-      case "wire_in":
-      case "wire_out":
-        return Repeat;
-      case "fee":
-        return Receipt;
-      case "fee_reversal":
-        return Repeat1;
-      case "interest":
-        return Percent;
-      case "fx_exchange":
-        return RefreshCw;
-      case "subscription":
-        return CalendarClock;
-      default:
-        return Receipt;
+    if (t.includes("fee")) {
+      return title.includes("reversal") ? Undo2 : Receipt;
     }
+    if (t === "card") return CreditCard;
+    if (t === "ach") return Banknote;
+    if (t === "wire") return Repeat;
+    if (t.includes("usd to bdt") || t.includes("international")) return Globe;
+    if (t === "internal_transfer") return positive ? ArrowDownLeft : ArrowUpRight;
+    return positive ? ArrowDownLeft : ArrowUpRight;
   })();
+
   return <Icon className={className} strokeWidth={1.6} />;
 }
