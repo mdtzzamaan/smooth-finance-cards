@@ -231,8 +231,7 @@ function TransferArc({
                 }
               >
                 <div className="coin-pill">
-                  <TxIcon type={type} className="w-3 h-3" />
-                  <span className="font-mono text-[11px] font-medium">{amount}</span>
+                  <span className="font-mono text-[11px] font-medium tracking-tight">{amount}</span>
                 </div>
               </div>
             </div>
