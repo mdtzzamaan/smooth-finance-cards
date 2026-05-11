@@ -88,7 +88,7 @@ export function TransactionDetail() {
       </div>
 
       {/* Sender → Receiver with curved money flow */}
-      <TransferArc from={from} to={to} amount={`${a.sign}$${a.value}`} type={tx.type} />
+      <TransferArc from={from} to={to} amount={`$${a.value}`} />
 
       {/* Linked original transaction (for fees) */}
       {linkedTx && (
