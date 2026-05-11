@@ -119,12 +119,9 @@ export function TransactionDetail() {
         </div>
       )}
 
-      {/* Linked transaction (org_txn_context for fees, fee_context for parents) */}
+      {/* Linked transaction — only fee → original (not the reverse) */}
       {tx.originalContext && (
         <LinkedCard label="Original transaction" ctx={tx.originalContext} />
-      )}
-      {tx.feeContext && (
-        <LinkedCard label="Related fee" ctx={tx.feeContext} />
       )}
 
       {/* Modern details — stacked tiles */}
