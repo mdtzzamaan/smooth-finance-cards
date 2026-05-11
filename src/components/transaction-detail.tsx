@@ -359,8 +359,8 @@ function Tile({
 function Row({ k, v, bold }: { k: string; v: string; bold?: boolean }) {
   return (
     <div className="flex items-center justify-between py-1">
-      <div className={`text-sm ${bold ? "text-white" : "text-white/70"}`}>{k}</div>
-      <div className={`font-mono text-sm ${bold ? "text-amber" : "text-white"}`}>{v}</div>
+      <div className="text-sm text-slate">{k}</div>
+      <div className={`font-mono text-sm ${bold ? "text-ink font-medium" : "text-ink"}`}>{v}</div>
     </div>
   );
 }
