@@ -187,18 +187,30 @@ export function TransactionDetail() {
 }
 
 function LinkedCard({ label, ctx }: { label: string; ctx: LinkedContext }) {
-  return (
-    <div className="px-6 mb-4 animate-fade-up">
-      <div className="label-mono mb-3">{label}</div>
-      <div className="bg-white rounded-2xl border border-line p-4">
-        {ctx.title && <div className="text-[14px] font-medium">{ctx.title}</div>}
+  const Inner = (
+    <div className="bg-white rounded-2xl border border-line p-4 flex items-center gap-3 hover:border-midnight/30 hover:bg-cream/40 transition">
+      <div className="flex-1 min-w-0">
+        {ctx.title && <div className="text-[14px] font-medium truncate">{ctx.title}</div>}
         {ctx.memo && (
-          <div className="text-xs text-slate mt-1 font-light leading-relaxed">{ctx.memo}</div>
+          <div className="text-xs text-slate mt-1 font-light leading-relaxed line-clamp-2">{ctx.memo}</div>
         )}
         {ctx.amount && (
           <div className="font-mono text-sm mt-2">{ctx.amount}</div>
         )}
       </div>
+      {ctx.id && <ChevronRight className="w-4 h-4 text-slate shrink-0" strokeWidth={1.6} />}
+    </div>
+  );
+  return (
+    <div className="px-6 mb-4 animate-fade-up">
+      <div className="label-mono mb-3">{label}</div>
+      {ctx.id ? (
+        <Link to="/transactions/$id" params={{ id: ctx.id }} className="block">
+          {Inner}
+        </Link>
+      ) : (
+        Inner
+      )}
     </div>
   );
 }
