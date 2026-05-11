@@ -305,7 +305,7 @@ function TransferArc({
 }
 
 function PartyChip({ party }: { party: Party }) {
-  const ring = party.color || "var(--ink)";
+  const ring = party.color || "var(--midnight)";
   return (
     <div className="relative shrink-0 animate-scale-in">
       <div
