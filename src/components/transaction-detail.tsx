@@ -88,7 +88,7 @@ export function TransactionDetail() {
       </div>
 
       {/* Sender → Receiver with curved money flow */}
-      <TransferArc from={from} to={to} amount={`${a.sign}$${a.value}`} type={tx.type} />
+      <TransferArc from={from} to={to} amount={`$${a.value}`} />
 
       {/* Linked original transaction (for fees) */}
       {linkedTx && (
@@ -128,20 +128,32 @@ export function TransactionDetail() {
           <Tile label="Reference" value={tx.reference} mono span />
           {tx.method && <Tile label="Method" value={tx.method} />}
           {tx.category && <Tile label="Category" value={tx.category} />}
+          {tx.channel && <Tile label="Channel" value={tx.channel} />}
+          {tx.balanceAfter !== undefined && (
+            <Tile label="Balance after" value={`$${tx.balanceAfter.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} mono />
+          )}
           {tx.meta &&
-            Object.entries(tx.meta).map(([k, v]) => (
-              <Tile
-                key={k}
-                label={k}
-                value={v}
-                mono={
-                  k.toLowerCase().includes("trace") ||
-                  k.toLowerCase().includes("imad") ||
-                  k.toLowerCase().includes("routing") ||
-                  k.toLowerCase().includes("auth")
-                }
-              />
-            ))}
+            Object.entries(tx.meta)
+              .filter(([k]) =>
+                tx.type === "fx_exchange"
+                  ? !["You sold", "You received", "Rate"].includes(k)
+                  : true
+              )
+              .map(([k, v]) => (
+                <Tile
+                  key={k}
+                  label={k}
+                  value={v}
+                  mono={
+                    k.toLowerCase().includes("trace") ||
+                    k.toLowerCase().includes("imad") ||
+                    k.toLowerCase().includes("routing") ||
+                    k.toLowerCase().includes("auth") ||
+                    k.toLowerCase().includes("rate") ||
+                    k.toLowerCase().includes("id")
+                  }
+                />
+              ))}
         </div>
         {tx.note && (
           <div className="mt-3 bg-amber-soft/60 border border-amber/30 rounded-2xl p-4">
@@ -151,19 +163,21 @@ export function TransactionDetail() {
         )}
       </div>
 
-      {/* Amount breakdown */}
-      <div className="px-6 mt-4 animate-fade-up">
-        <div className="bg-midnight text-white rounded-2xl p-5 relative overflow-hidden">
-          <div className="absolute -bottom-12 -right-10 w-40 h-40 rounded-full opacity-25 blur-2xl" style={{ background: "var(--amber)" }} />
-          <div className="relative">
-            <div className="label-mono text-white/60 mb-3">Summary</div>
-            <Row k="Amount" v={`${a.sign}$${a.value} ${tx.currency}`} />
-            {tx.type !== "fee" && <Row k="Fees" v={tx.type === "fx_exchange" ? "Included in rate" : "$0.00"} />}
-            <div className="h-px bg-white/10 my-3" />
-            <Row k="Total" v={`${a.sign}$${a.value}`} bold />
+      {/* Amount breakdown — only when there is a meaningful split (fx or fees applied separately) */}
+      {tx.type === "fx_exchange" && (
+        <div className="px-6 mt-4 animate-fade-up">
+          <div className="bg-midnight text-white rounded-2xl p-5 relative overflow-hidden">
+            <div className="absolute -bottom-12 -right-10 w-40 h-40 rounded-full opacity-25 blur-2xl" style={{ background: "var(--amber)" }} />
+            <div className="relative">
+              <div className="label-mono text-white/60 mb-3">Exchange summary</div>
+              <Row k="You sold" v={tx.meta?.["You sold"] || `$${a.value} ${tx.currency}`} />
+              <Row k="Rate" v={tx.meta?.["Rate"] || "—"} />
+              <div className="h-px bg-white/10 my-3" />
+              <Row k="You received" v={tx.meta?.["You received"] || ""} bold />
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Actions */}
       <div className="px-6 mt-4 mb-10 grid grid-cols-3 gap-3 animate-fade-up">
@@ -184,12 +198,10 @@ function TransferArc({
   from,
   to,
   amount,
-  type,
 }: {
   from: Party;
   to: Party;
   amount: string;
-  type: Transaction["type"];
 }) {
   // SVG viewBox is 320x110. Coin animates along the curve from x=46 to x=274.
   const pathD = "M 46 78 Q 160 -10 274 78";
@@ -231,8 +243,7 @@ function TransferArc({
                 }
               >
                 <div className="coin-pill">
-                  <TxIcon type={type} className="w-3 h-3" />
-                  <span className="font-mono text-[11px] font-medium">{amount}</span>
+                  <span className="font-mono text-[11px] font-medium tracking-tight">{amount}</span>
                 </div>
               </div>
             </div>
