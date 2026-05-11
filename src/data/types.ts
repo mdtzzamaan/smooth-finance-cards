@@ -31,6 +31,7 @@ export interface Merchant {
 }
 
 export interface LinkedContext {
+  id?: string; // resolved at runtime — id of the related transaction
   title?: string;
   memo?: string;
   amount?: string; // pre-formatted from API
