@@ -1,24 +1,22 @@
 import { Link, useParams } from "@tanstack/react-router";
-import { ArrowLeft, Share2, MoreHorizontal, ChevronRight, Download, Flag, Repeat2 } from "lucide-react";
+import { ArrowLeft, Share2, MoreHorizontal, Download, Flag, Repeat2 } from "lucide-react";
 import {
   getTransaction,
-  txTypeLabel,
   counterpartyOf,
+  maskAccount,
   type Transaction,
   type Party,
+  type LinkedContext,
 } from "@/data/transactions";
-import { TxIcon } from "@/components/tx-icon";
 import { formatAmount, formatDate, formatTime } from "@/lib/format";
 import { PhoneFrame } from "@/components/transactions-list";
 
 const statusColor: Record<string, string> = {
   completed: "var(--success)",
   pending: "var(--warning)",
-  failed: "var(--error)",
   declined: "var(--error)",
   expired: "var(--slate)",
   released: "var(--success)",
-  scheduled: "var(--info)",
 };
 
 export function TransactionDetail() {
@@ -39,14 +37,13 @@ export function TransactionDetail() {
 
   const a = formatAmount(tx.amount, tx.currency);
   const positive = tx.amount > 0;
-  const linkedTx = tx.feeRelatedTo ? getTransaction(tx.feeRelatedTo) : null;
-  const cp = counterpartyOf(tx);
+  const isZero = tx.amount === 0;
 
   const heroLabel =
     tx.status === "declined"
       ? "Declined"
       : tx.status === "expired"
-      ? "Expired hold"
+      ? "Expired"
       : tx.status === "released"
       ? "Hold released"
       : tx.status === "pending"
@@ -72,7 +69,7 @@ export function TransactionDetail() {
           <Link to="/transactions" className="w-10 h-10 rounded-full bg-white border border-line flex items-center justify-center hover:bg-cream transition">
             <ArrowLeft className="w-4 h-4" strokeWidth={1.6} />
           </Link>
-          <div className="label-mono">{tx.badge || txTypeLabel[tx.type]}</div>
+          {tx.badge && <div className="label-mono">{tx.badge}</div>}
           <button className="w-10 h-10 rounded-full bg-white border border-line flex items-center justify-center hover:bg-cream transition">
             <MoreHorizontal className="w-4 h-4" strokeWidth={1.6} />
           </button>
@@ -83,7 +80,7 @@ export function TransactionDetail() {
       <div className="px-6 pt-6 pb-2 text-center animate-fade-up">
         <div className="label-mono mb-3">{heroLabel}</div>
         <h1 className={`font-display text-[56px] leading-none ${heroColor}`}>
-          {a.sign}${a.value}
+          {isZero ? "—" : `${a.sign}$${a.value}`}
         </h1>
         <div className="mt-3 flex items-center justify-center gap-2 flex-wrap">
           <span className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: statusColor[tx.status] }} />
@@ -92,7 +89,7 @@ export function TransactionDetail() {
             · {formatDate(tx.date)} at {formatTime(tx.date)}
           </span>
         </div>
-        {tx.bdtAmount && (
+        {tx.bdtAmount != null && (
           <div className="text-xs text-slate font-light mt-1.5">
             ≈ ৳{tx.bdtAmount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} BDT
             {tx.fxRate && <> · {tx.fxRate}</>}
@@ -101,12 +98,14 @@ export function TransactionDetail() {
       </div>
 
       {/* Sender → Receiver with curved money flow */}
-      <TransferArc
-        from={tx.from}
-        to={tx.to}
-        amount={`$${a.value}`}
-        animated={tx.status !== "declined" && tx.status !== "expired"}
-      />
+      {(tx.from || tx.to) && (
+        <TransferArc
+          from={tx.from}
+          to={tx.to}
+          amount={isZero ? "" : `$${a.value}`}
+          animated={tx.status !== "declined" && tx.status !== "expired" && !isZero}
+        />
+      )}
 
       {/* Reason for declined / expired */}
       {tx.reason && (
@@ -120,50 +119,27 @@ export function TransactionDetail() {
         </div>
       )}
 
-      {/* Linked original transaction (for fees) */}
-      {linkedTx && (
-        <div className="px-6 mb-4 animate-fade-up">
-          <div className="label-mono mb-3">Linked transaction</div>
-          <Link
-            to="/transactions/$id"
-            params={{ id: linkedTx.id }}
-            className="bg-white rounded-2xl border border-line p-4 flex items-center gap-3 hover:border-midnight/30 transition group block"
-          >
-            <div
-              className="w-10 h-10 rounded-full flex items-center justify-center text-white shrink-0"
-              style={{ background: counterpartyOf(linkedTx).color || "var(--midnight)" }}
-            >
-              <TxIcon type={linkedTx.type} className="w-4 h-4" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-[14px] font-medium truncate">{linkedTx.title}</div>
-              <div className="text-xs text-slate truncate font-light">
-                {txTypeLabel[linkedTx.type]} · {formatDate(linkedTx.date)}
-              </div>
-            </div>
-            <div className="text-right shrink-0 mr-1">
-              <div className="font-mono text-sm">
-                {formatAmount(linkedTx.amount).sign}${formatAmount(linkedTx.amount).value}
-              </div>
-            </div>
-            <ChevronRight className="w-4 h-4 text-slate group-hover:translate-x-0.5 transition" />
-          </Link>
-        </div>
+      {/* Linked transaction (org_txn_context for fees, fee_context for parents) */}
+      {tx.originalContext && (
+        <LinkedCard label="Original transaction" ctx={tx.originalContext} />
+      )}
+      {tx.feeContext && (
+        <LinkedCard label="Related fee" ctx={tx.feeContext} />
       )}
 
       {/* Modern details — stacked tiles */}
       <div className="px-6 animate-fade-up">
         <div className="label-mono mb-3">Details</div>
         <div className="grid grid-cols-2 gap-2.5">
-          <Tile label="Reference" value={tx.reference} mono span />
-          {tx.method && <Tile label="Method" value={tx.method} />}
-          {tx.category && <Tile label="Category" value={tx.category} />}
-          {tx.card && <Tile label="Card" value={`${tx.card.network || "Card"} ${tx.card.mask}`} mono />}
-          {tx.merchant?.location && <Tile label="Merchant" value={`${tx.merchant.name} · ${tx.merchant.location}`} span />}
-          {tx.merchant?.mcc && <Tile label="MCC" value={tx.merchant.mcc} />}
-          {tx.accountNo && <Tile label="From account" value={tx.accountNo} mono />}
-          {tx.channel && <Tile label="Channel" value={tx.channel} />}
-          {tx.balanceAfter !== undefined && (
+          <Tile label="Reference" value={`PRIYO-${tx.id}`} mono span />
+          {tx.card?.mask && <Tile label="Card" value={tx.card.mask} mono />}
+          {maskAccount(tx.accountNo) && (
+            <Tile label="From account" value={maskAccount(tx.accountNo)!} mono />
+          )}
+          {tx.merchant?.location && (
+            <Tile label="Location" value={tx.merchant.location} span />
+          )}
+          {tx.balanceAfter != null && (
             <Tile
               label="Balance after"
               value={`$${tx.balanceAfter.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
@@ -179,8 +155,8 @@ export function TransactionDetail() {
         )}
       </div>
 
-      {/* International transfer summary */}
-      {tx.type === "international_transfer_out" && tx.bdtAmount && (
+      {/* Remittance summary */}
+      {tx.bdtAmount != null && !isZero && (
         <div className="px-6 mt-4 animate-fade-up">
           <div className="bg-midnight text-white rounded-2xl p-5 relative overflow-hidden">
             <div className="absolute -bottom-12 -right-10 w-40 h-40 rounded-full opacity-25 blur-2xl" style={{ background: "var(--amber)" }} />
@@ -210,14 +186,31 @@ export function TransactionDetail() {
   );
 }
 
+function LinkedCard({ label, ctx }: { label: string; ctx: LinkedContext }) {
+  return (
+    <div className="px-6 mb-4 animate-fade-up">
+      <div className="label-mono mb-3">{label}</div>
+      <div className="bg-white rounded-2xl border border-line p-4">
+        {ctx.title && <div className="text-[14px] font-medium">{ctx.title}</div>}
+        {ctx.memo && (
+          <div className="text-xs text-slate mt-1 font-light leading-relaxed">{ctx.memo}</div>
+        )}
+        {ctx.amount && (
+          <div className="font-mono text-sm mt-2">{ctx.amount}</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function TransferArc({
   from,
   to,
   amount,
   animated,
 }: {
-  from: Party;
-  to: Party;
+  from?: Party;
+  to?: Party;
   amount: string;
   animated: boolean;
 }) {
@@ -247,7 +240,7 @@ function TransferArc({
               strokeDasharray="3 5"
               strokeLinecap="round"
             />
-            {animated && (
+            {animated && amount && (
               <g>
                 <rect x="-30" y="-13" width="60" height="22" rx="11" fill="var(--midnight)" />
                 <text
@@ -273,23 +266,31 @@ function TransferArc({
             )}
           </svg>
 
-          <div className="absolute top-1/2 left-0 -translate-x-1/2 -translate-y-1/2 z-10">
-            <PartyChip party={from} />
-          </div>
-          <div className="absolute top-1/2 right-0 translate-x-1/2 -translate-y-1/2 z-10">
-            <PartyChip party={to} />
-          </div>
+          {from && (
+            <div className="absolute top-1/2 left-0 -translate-x-1/2 -translate-y-1/2 z-10">
+              <PartyChip party={from} />
+            </div>
+          )}
+          {to && (
+            <div className="absolute top-1/2 right-0 translate-x-1/2 -translate-y-1/2 z-10">
+              <PartyChip party={to} />
+            </div>
+          )}
         </div>
 
         <div className="mt-4 flex items-center justify-between">
           <div className="min-w-0 max-w-[42%]">
-            <div className="text-[13px] font-medium truncate">{from.name}</div>
-            <div className="text-[11px] text-slate truncate font-light">{from.detail || ""}</div>
+            <div className="text-[13px] font-medium truncate">{from?.name || "—"}</div>
+            {from?.detail && (
+              <div className="text-[11px] text-slate truncate font-light">{from.detail}</div>
+            )}
           </div>
           <div className="label-mono opacity-60 px-2">to</div>
           <div className="min-w-0 max-w-[42%] text-right">
-            <div className="text-[13px] font-medium truncate">{to.name}</div>
-            <div className="text-[11px] text-slate truncate font-light">{to.detail || ""}</div>
+            <div className="text-[13px] font-medium truncate">{to?.name || "—"}</div>
+            {to?.detail && (
+              <div className="text-[11px] text-slate truncate font-light">{to.detail}</div>
+            )}
           </div>
         </div>
       </div>
@@ -311,12 +312,20 @@ function PartyChip({ party }: { party: Party }) {
             alt={party.name}
             className="w-full h-full rounded-full object-cover bg-cream"
             loading="lazy"
+            onError={(e) => {
+              const el = e.currentTarget;
+              el.style.display = "none";
+              const sib = el.nextElementSibling as HTMLElement | null;
+              if (sib) sib.style.display = "flex";
+            }}
           />
-        ) : (
-          <div className="w-full h-full rounded-full bg-cream flex items-center justify-center text-xs font-medium text-midnight">
-            {party.name?.slice(0, 2).toUpperCase()}
-          </div>
-        )}
+        ) : null}
+        <div
+          className="w-full h-full rounded-full bg-cream items-center justify-center text-xs font-medium text-midnight"
+          style={{ display: party.imageUrl ? "none" : "flex" }}
+        >
+          {(party.name || "?").slice(0, 2).toUpperCase()}
+        </div>
       </div>
     </div>
   );

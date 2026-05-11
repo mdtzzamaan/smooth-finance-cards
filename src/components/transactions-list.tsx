@@ -44,7 +44,7 @@ export function TransactionsList() {
           </div>
 
           <h1 className="font-display text-5xl mb-1">Activity</h1>
-          <p className="text-white/60 text-sm font-light mb-8">May 2026 · {transactions.length} transactions</p>
+          <p className="text-white/60 text-sm font-light mb-8">{transactions.length} transactions</p>
 
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-white/5 backdrop-blur rounded-2xl p-4 border border-white/10">
@@ -98,6 +98,10 @@ export function TransactionsList() {
 function TxRow({ tx, divider }: { tx: Transaction; divider: boolean }) {
   const a = formatAmount(tx.amount, tx.currency);
   const positive = tx.amount > 0;
+  const cp = counterpartyOf(tx);
+  const showZero = tx.amount === 0; // pending / expired / declined etc.
+  const muted = tx.status === "declined" || tx.status === "expired";
+
   return (
     <Link
       to="/transactions/$id"
@@ -106,32 +110,31 @@ function TxRow({ tx, divider }: { tx: Transaction; divider: boolean }) {
     >
       <div
         className="w-11 h-11 rounded-full overflow-hidden shrink-0 ring-1 ring-line"
-        style={{ background: counterpartyOf(tx).color || "var(--midnight)" }}
+        style={{ background: cp.color || "var(--midnight)" }}
       >
-        {counterpartyOf(tx).imageUrl ? (
+        {cp.imageUrl ? (
           <img
-            src={counterpartyOf(tx).imageUrl}
-            alt={counterpartyOf(tx).name}
+            src={cp.imageUrl}
+            alt={cp.name}
             className="w-full h-full object-cover"
             loading="lazy"
+            onError={(e) => ((e.currentTarget.style.display = "none"))}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-white">
-            <TxIcon type={tx.type} className="w-[18px] h-[18px]" />
+            <TxIcon tx={tx} className="w-[18px] h-[18px]" />
           </div>
         )}
       </div>
       <div className="flex-1 min-w-0">
-        <div className="flex items-baseline gap-2">
-          <div className="font-medium text-[15px] truncate">{tx.title}</div>
-        </div>
+        <div className="font-medium text-[15px] truncate">{tx.title}</div>
         <div className="text-xs text-slate truncate font-light">
-          {formatTime(tx.date)} · {tx.subtitle.replace(/\s*··\s*\d+/g, "").replace(/\s+·\s*$/, "")}
+          {formatTime(tx.date)} · {tx.subtitle}
         </div>
       </div>
       <div className="text-right shrink-0">
-        <div className={`font-mono text-[15px] ${positive ? "text-success" : tx.status === "declined" || tx.status === "expired" ? "text-slate line-through" : "text-ink"}`}>
-          {a.sign}${a.value}
+        <div className={`font-mono text-[15px] ${positive ? "text-success" : muted ? "text-slate line-through" : "text-ink"}`}>
+          {showZero ? "—" : `${a.sign}$${a.value}`}
         </div>
         {tx.status !== "completed" && (
           <div
@@ -140,7 +143,7 @@ function TxRow({ tx, divider }: { tx: Transaction; divider: boolean }) {
               color:
                 tx.status === "pending"
                   ? "var(--warning)"
-                  : tx.status === "declined" || tx.status === "failed"
+                  : tx.status === "declined"
                   ? "var(--error)"
                   : tx.status === "released"
                   ? "var(--success)"
