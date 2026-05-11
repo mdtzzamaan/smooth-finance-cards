@@ -184,12 +184,10 @@ function TransferArc({
   from,
   to,
   amount,
-  type,
 }: {
   from: Party;
   to: Party;
   amount: string;
-  type: Transaction["type"];
 }) {
   // SVG viewBox is 320x110. Coin animates along the curve from x=46 to x=274.
   const pathD = "M 46 78 Q 160 -10 274 78";
