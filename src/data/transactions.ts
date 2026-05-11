@@ -452,3 +452,10 @@ export const statusLabel: Record<TxStatus, string> = {
   expired: "expired",
   released: "released",
 };
+
+// The non-self party in a transaction. Falls back to "to" then "from".
+export function counterpartyOf(tx: Transaction): Party {
+  if (tx.from?.isSelf && tx.to) return tx.to;
+  if (tx.to?.isSelf && tx.from) return tx.from;
+  return tx.to || tx.from;
+}

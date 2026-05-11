@@ -49,7 +49,7 @@ function Index() {
               >
                 <div
                   className="w-11 h-11 rounded-full flex items-center justify-center text-white shrink-0"
-                  style={{ background: t.counterparty.color || "var(--midnight)" }}
+                  style={{ background: counterpartyOf(t).color || "var(--midnight)" }}
                 >
                   <TxIcon type={t.type} className="w-[18px] h-[18px]" />
                 </div>
